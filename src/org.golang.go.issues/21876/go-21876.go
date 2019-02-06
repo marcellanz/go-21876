@@ -12,7 +12,6 @@ import (
 var ErrUnknownArchiveFormat = errors.New("unknown archive format")
 
 func main() {
-	//	_, err := TarTransform("/tmp/bluh.zip", "/tmp/bluh.tar")
 	_, err := TarTransform(os.Args[1], os.Args[2])
 	if err != nil {
 		fmt.Println(err)
