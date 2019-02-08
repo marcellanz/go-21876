@@ -8,8 +8,6 @@ import (
 	"os"
 )
 
-// https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT
-
 func main() {
 	_, err := TarTransform(os.Args[1], os.Args[2])
 	if err != nil {
