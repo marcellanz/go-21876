@@ -37,7 +37,7 @@ What seems to be happening is the following:
 ./run.sh -fixed
 ```
 
-## fix
+## Fix
 To fix this issue on the issuers side, general purpose flags can be cleared.
 ```
 e.gp_flags &= ~0x8
@@ -63,7 +63,7 @@ ZIP file structure (simplified)
       [central directory header n]
 ```
 
-## Refs
+## References
 
 [0] https://github.com/marcellanz/go-21876
 
@@ -77,9 +77,9 @@ ZIP file structure (simplified)
 
 [5] https://github.com/rubyzip/rubyzip
 
-[6] https://github.com/rubyzip/rubyzip/blob/master/lib/zip/output_stream.rb#L130-L131
+[6] https://github.com/rubyzip/rubyzip/blob/v1.2.2/lib/zip/output_stream.rb#L130-L131
 
-[7] https://github.com/rubyzip/rubyzip/blob/master/lib/zip/central_directory.rb#L127
+[7] https://github.com/rubyzip/rubyzip/blob/v1.2.2/lib/zip/central_directory.rb#L127
 
 [8] https://github.com/golang/go/blob/release-branch.go1.11/src/archive/zip/reader.go#L170-L171
 
