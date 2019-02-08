@@ -13,7 +13,7 @@ IMO this is a non-issue from Go's point of view, here is why:
 
 I was able to reproduce the issue on "go version go1.11.5 darwin/amd64" with the *.jar file and ruby code provided to this issue.
 
-Also, I was able to create a similar zip file using _ZIP(1L)_ on MacOS that behaved similarly with the ruby script provided and then processed with the go code of this issue.
+Also, I was able to create a similar zip file using _ZIP(1L)_ on macOS that behaved similarly with the ruby script provided and then processed with the go code of this issue.
 
 (I extracted both the go and ruby code here [\[0\]](https://github.com/marcellanz/go-21876) together with a test to reproduce the issue and a fix for it)
 
@@ -22,7 +22,7 @@ What seems to be happening is the following:
 
 1. The produced zip file by the ruby code [\[2\]](https://github.com/marcellanz/go-21876/blob/master/src/org.golang.go.issues/21876/go-21876-issue-script-given.rb) left bit 3 set on 1 of the _general purpose bit flag_ that is part of the _central directory header_ and that indicates the presence of a corresponding data descriptor entry for a file within the zip file…
 
-1. … but Ruby's zip implementation _RubyZip_ [\[5\]](https://github.com/rubyzip/rubyzip) does not write data descriptor entries at all [\[6\]](https://github.com/rubyzip/rubyzip/blob/v1.2.2/lib/zip/output_stream.rb#L130-L131) (at least for all non-encryption zip files IMO / see ::Zip::NullDecrypter) and ignores the general purpose bit flag on bit 3 that was copied over initially [\[7\]](https://github.com/rubyzip/rubyzip/blob/v1.2.2/lib/zip/central_directory.rb#L127).
+1. … but Ruby's zip implementation _Rubyzip_ [\[5\]](https://github.com/rubyzip/rubyzip) does not write data descriptor entries at all [\[6\]](https://github.com/rubyzip/rubyzip/blob/v1.2.2/lib/zip/output_stream.rb#L130-L131) (at least for all non-encryption zip files IMO / see [::Zip::NullDecrypter](https://github.com/rubyzip/rubyzip/blob/v1.2.2/lib/zip/crypto/null_encryption.rb#L23-L25)) and ignores the general purpose bit flag on bit 3 that was copied over initially [\[7\]](https://github.com/rubyzip/rubyzip/blob/v1.2.2/lib/zip/central_directory.rb#L127).
 
 1. Go's zip reader implementation reads the general purpose flag on bit 3 when reading the central directory header entry of every file in the zip file [\[8\]](https://github.com/golang/go/blob/release-branch.go1.11/src/archive/zip/reader.go#L170-L171) and then expects to get to find a data descriptor entry after the corresponding file data section within the zip file.
 
@@ -30,13 +30,13 @@ What seems to be happening is the following:
 
 ## issue reproduced
 
-Here we produce a zip file with data descriptors included for zip file entries using "-fd" flag with ZIP(1L) on MacOS. Then as described in the issue, the ruby script is used to remove directories out of the zip file and the zip file is transformed to a tar file using Go. Run the following script to reproduce the issue and check out the fix for it:
+Here we produce a zip file with data descriptors included for zip file entries using "-fd" flag with ZIP(1L) on macOS. Then, as described in the issue, the ruby script is used to remove directories out of the zip file and the zip file is transformed to a tar file using Go. Run the following script to reproduce the issue:
 
 ```
 cd src/org.golang.go.issues/21876
 # see it fail
 ./run.sh
-# see it not fail
+# see it not fail with cleared gp_flags (see below)
 ./run.sh -fixed
 ```
 
@@ -47,6 +47,8 @@ e.gp_flags &= ~0x8
 ```
 
 Also (I'm not a ruby expert) Rubyzip's zip output stream might have to be fixed for entries that where copied over from an existing zip file. There is an issue [\[10\]](https://github.com/rubyzip/rubyzip/issues/249) on Rubyzip that is Open and indicates to be similar to Issue21876.
+
+Similar to Go's zip reader, macOS's _Archive Utility.app_ cannot open the ZIP file produced by Rubyzip.
  
 ## ZIP data descriptor entries
 missing data descriptor entries and leftover flags after Rubyzip modified zip file:
